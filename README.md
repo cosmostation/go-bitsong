@@ -25,7 +25,6 @@ There are many ways you can install BitSong Blockchain Testnet node on your mach
      
     cat <<EOF >> ~/.profile  
     export GOPATH=$HOME/go  
-    export GO111MODULE=on  
     export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin  
     EOF
     ```
@@ -35,7 +34,7 @@ There are many ways you can install BitSong Blockchain Testnet node on your mach
     cd $GOPATH/src/github.com/BitSongOfficial
     git clone https://github.com/BitSongOfficial/go-bitsong.git
     cd go-bitsong
-    git checkout sdk-v0.42.x
+    git checkout hackatom/nft
     ```
   3. **Compile**
 		```bash
