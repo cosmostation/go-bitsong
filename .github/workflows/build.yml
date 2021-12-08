@@ -23,14 +23,13 @@ jobs:
     name: go-bitsong ${{ matrix.arch }} for ${{ matrix.targetos }}
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2.1.4
+      - name: Setup go
+        uses: actions/setup-go@v2.1.4
         with:
-          go-version: '^1.16'
+          go-version: 1.17
         env:
           GOOS: ${{ matrix.targetos }}
           GOARCH: ${{ matrix.arch }}
-
-      - name: Compile go-bitsong
         run: |
           go mod download
           cd cmd/bitsongd
