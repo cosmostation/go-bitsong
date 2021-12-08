@@ -1,6 +1,6 @@
 module github.com/bitsongofficial/go-bitsong
 
-go 1.17
+go 1.16
 
 require (
 	github.com/cosmos/cosmos-sdk v0.44.5
