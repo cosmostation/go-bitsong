@@ -32,6 +32,7 @@ jobs:
 
       - name: Compile go-bitsong
         run: |
+          go mod tidy
           go mod download
           cd cmd/bitsongd
           go build .
