@@ -3,8 +3,6 @@ package app
 import (
 	"encoding/json"
 
-	"github.com/bitsongofficial/chainmodules/types"
-	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -22,15 +20,16 @@ import (
 type GenesisState map[string]json.RawMessage
 
 // NewDefaultGenesisState generates the default state for the application.
-func NewDefaultGenesisState(cdc codec.JSONMarshaler) GenesisState {
-	genesis := ModuleBasics.DefaultGenesis(cdc)
+func NewDefaultGenesisState() GenesisState {
+	encCfg := MakeEncodingConfig()
+	genesis := ModuleBasics.DefaultGenesis(encCfg.Marshaler)
 	mintGenesis := mintGenesisState()
 	stakingGenesis := stakingGenesisState()
 	govGenesis := govGenesisState()
 
-	genesis["mint"] = cdc.MustMarshalJSON(mintGenesis)
-	genesis["staking"] = cdc.MustMarshalJSON(stakingGenesis)
-	genesis["gov"] = cdc.MustMarshalJSON(govGenesis)
+	genesis["mint"] = encCfg.Marshaler.MustMarshalJSON(mintGenesis)
+	genesis["staking"] = encCfg.Marshaler.MustMarshalJSON(stakingGenesis)
+	genesis["gov"] = encCfg.Marshaler.MustMarshalJSON(govGenesis)
 
 	return genesis
 }
@@ -44,7 +43,7 @@ func stakingGenesisState() *stakingtypes.GenesisState {
 			stakingtypes.DefaultMaxValidators,
 			stakingtypes.DefaultMaxEntries,
 			0,
-			types.BondDenom,
+			BondDenom,
 		),
 	}
 }
@@ -53,7 +52,7 @@ func govGenesisState() *govtypes.GenesisState {
 	return govtypes.NewGenesisState(
 		1,
 		govtypes.NewDepositParams(
-			sdk.NewCoins(sdk.NewCoin(types.BondDenom, govtypes.DefaultMinDepositTokens)),
+			sdk.NewCoins(sdk.NewCoin(BondDenom, govtypes.DefaultMinDepositTokens)),
 			govtypes.DefaultPeriod,
 		),
 		govtypes.NewVotingParams(govtypes.DefaultPeriod),
@@ -64,7 +63,7 @@ func govGenesisState() *govtypes.GenesisState {
 func mintGenesisState() *minttypes.GenesisState {
 	return &minttypes.GenesisState{
 		Params: minttypes.NewParams(
-			types.BondDenom,
+			BondDenom,
 			sdk.NewDecWithPrec(13, 2),
 			sdk.NewDecWithPrec(20, 2),
 			sdk.NewDecWithPrec(7, 2),

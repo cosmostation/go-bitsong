@@ -11,7 +11,7 @@ import (
 // CosmosApp implements the common methods for a Cosmos SDK-based application
 // specific blockchain.
 type CosmosApp interface {
-	// Name The assigned name of the app.
+	// appName The assigned name of the app.
 	Name() string
 
 	// LegacyAmino The application types codec.

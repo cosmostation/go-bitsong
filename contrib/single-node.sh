@@ -51,6 +51,7 @@ sed -i 's/index_all_keys = false/index_all_keys = true/g' $CHAIN_DIR/$CHAIN_ID/c
 sed -i 's/enable = false/enable = true/g' $CHAIN_DIR/$CHAIN_ID/config/app.toml
 sed -i 's/swagger = false/swagger = true/g' $CHAIN_DIR/$CHAIN_ID/config/app.toml
 sed -i 's/"voting_period": "172800s"/"voting_period": "20s"/g' $CHAIN_DIR/$CHAIN_ID/config/genesis.json
+sed -i 's/"stake"/"ubtsg"/g' $CHAIN_DIR/$CHAIN_ID/config/genesis.json
 
 # Start bitsong
 echo "Starting $CHAIN_ID in $CHAIN_DIR..."
