@@ -32,6 +32,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	tmcmds "github.com/tendermint/tendermint/cmd/tendermint/commands"
 )
 
 var ChainID string
@@ -93,6 +94,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 		PrepareGenesisCmd(app.DefaultNodeHome, app.ModuleBasics),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		//testnetCmd(gaia.ModuleBasics, banktypes.GenesisBalancesIterator{}),
+		tmcmds.RollbackStateCmd,
 		debug.Cmd(),
 		config.Cmd(),
 	)
