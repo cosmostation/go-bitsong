@@ -93,7 +93,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 		AddGenesisAccountCmd(app.DefaultNodeHome),
 		PrepareGenesisCmd(app.DefaultNodeHome, app.ModuleBasics),
 		tmcli.NewCompletionCmd(rootCmd, true),
-		//testnetCmd(gaia.ModuleBasics, banktypes.GenesisBalancesIterator{}),
+		testnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		tmcmds.RollbackStateCmd,
 		debug.Cmd(),
 		config.Cmd(),
