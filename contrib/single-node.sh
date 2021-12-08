@@ -30,6 +30,9 @@ fi
 echo "Initializing $CHAIN_ID..."
 $BINARY --home $CHAIN_DIR/$CHAIN_ID init test --chain-id=$CHAIN_ID
 
+echo "Preparing genesis..."
+$BINARY prepare-genesis testnet $CHAIN_ID --home $CHAIN_DIR/$CHAIN_ID
+
 echo "Adding genesis accounts..."
 echo $MNEMONIC_1 | $BINARY --home $CHAIN_DIR/$CHAIN_ID keys add validator --recover --keyring-backend=test 
 echo $MNEMONIC_2 | $BINARY --home $CHAIN_DIR/$CHAIN_ID keys add user1 --recover --keyring-backend=test 
@@ -50,8 +53,6 @@ sed -i 's/timeout_propose = "3s"/timeout_propose = "1s"/g' $CHAIN_DIR/$CHAIN_ID/
 sed -i 's/index_all_keys = false/index_all_keys = true/g' $CHAIN_DIR/$CHAIN_ID/config/config.toml
 sed -i 's/enable = false/enable = true/g' $CHAIN_DIR/$CHAIN_ID/config/app.toml
 sed -i 's/swagger = false/swagger = true/g' $CHAIN_DIR/$CHAIN_ID/config/app.toml
-sed -i 's/"voting_period": "172800s"/"voting_period": "20s"/g' $CHAIN_DIR/$CHAIN_ID/config/genesis.json
-sed -i 's/"stake"/"ubtsg"/g' $CHAIN_DIR/$CHAIN_ID/config/genesis.json
 
 # Start bitsong
 echo "Starting $CHAIN_ID in $CHAIN_DIR..."
