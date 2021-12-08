@@ -30,6 +30,7 @@ jobs:
         env:
           GOOS: ${{ matrix.targetos }}
           GOARCH: ${{ matrix.arch }}
+      - name: Compile go-bitsong
         run: |
           go mod download
           cd cmd/bitsongd
