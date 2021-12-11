@@ -80,7 +80,7 @@ func (s *IntegrationTestSuite) TestToken() {
 	bz, err := tokentestutil.IssueFanTokenExec(clientCtx, from.String(), args...)
 
 	s.Require().NoError(err)
-	s.Require().NoError(clientCtx.JSONCodec.UnmarshalJSON(bz.Bytes(), respType), bz.String())
+	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(bz.Bytes(), respType), bz.String())
 	txResp := respType.(*sdk.TxResponse)
 	s.Require().Equal(expectedCode, txResp.Code)
 

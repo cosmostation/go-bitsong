@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	simapp "github.com/bitsongofficial/go-bitsong/app"
+	"github.com/bitsongofficial/go-bitsong/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -19,19 +19,19 @@ func TestValidateParams(t *testing.T) {
 		{
 			"Minimum value",
 			Params{
-				IssuePrice: sdk.NewCoin(simapp.BondDenom, sdk.ZeroInt()),
+				IssuePrice: sdk.NewCoin(types.BondDenom, sdk.ZeroInt()),
 			},
 			true,
 		}, {
 			"Maximum value",
 			Params{
-				IssuePrice: sdk.NewCoin(simapp.BondDenom, sdk.NewInt(math.MaxInt64)),
+				IssuePrice: sdk.NewCoin(types.BondDenom, sdk.NewInt(math.MaxInt64)),
 			},
 			true,
 		}, {
 			"IssuePrice is negative",
 			Params{
-				IssuePrice: sdk.Coin{Denom: simapp.BondDenom, Amount: sdk.NewInt(-1)},
+				IssuePrice: sdk.Coin{Denom: types.BondDenom, Amount: sdk.NewInt(-1)},
 			},
 			false,
 		},

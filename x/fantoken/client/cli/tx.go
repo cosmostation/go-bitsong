@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"github.com/bitsongofficial/go-bitsong/app"
 	"strconv"
 	"strings"
 
@@ -14,6 +13,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 
+	"github.com/bitsongofficial/go-bitsong/types"
 	tokentypes "github.com/bitsongofficial/go-bitsong/x/fantoken/types"
 )
 
@@ -90,7 +90,7 @@ func GetCmdIssueFanToken() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("failed to parse issue fee: %s", issueFeeStr)
 			}
-			if issueFee.Denom != app.BondDenom {
+			if issueFee.Denom != types.BondDenom {
 				return fmt.Errorf("the issue fee denom should be bond denom")
 			}
 

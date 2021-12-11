@@ -2,7 +2,6 @@ package rest
 
 import (
 	"fmt"
-	simapp "github.com/bitsongofficial/go-bitsong/app"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
+	apptypes "github.com/bitsongofficial/go-bitsong/types"
 	"github.com/bitsongofficial/go-bitsong/x/fantoken/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -59,7 +59,7 @@ func issueTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 			MaxSupply:   maxSupply,
 			Description: req.Description,
 			Owner:       req.Owner,
-			IssueFee:    sdk.NewCoin(simapp.BondDenom, issueFee),
+			IssueFee:    sdk.NewCoin(apptypes.BondDenom, issueFee),
 		}
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())

@@ -2,7 +2,6 @@ package simulation
 
 import (
 	"fmt"
-	simapp "github.com/bitsongofficial/go-bitsong/app"
 	"math/rand"
 	"strings"
 
@@ -14,6 +13,7 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
+	"github.com/bitsongofficial/go-bitsong/types"
 	"github.com/bitsongofficial/go-bitsong/x/fantoken/keeper"
 	tokentypes "github.com/bitsongofficial/go-bitsong/x/fantoken/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -93,7 +93,7 @@ func SimulateIssueFanToken(k keeper.Keeper, ak tokentypes.AccountKeeper, bk toke
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 
 		token, maxFees := genFanToken(ctx, r, k, ak, bk, accs)
-		msg := tokentypes.NewMsgIssueFanToken(token.GetSymbol(), token.Name, token.MaxSupply, token.MetaData.Description, token.GetOwner().String(), sdk.NewCoin(simapp.BondDenom, sdk.NewInt(1000000)))
+		msg := tokentypes.NewMsgIssueFanToken(token.GetSymbol(), token.Name, token.MaxSupply, token.MetaData.Description, token.GetOwner().String(), sdk.NewCoin(types.BondDenom, sdk.NewInt(1000000)))
 
 		simAccount, found := simtypes.FindAccount(accs, token.GetOwner())
 		if !found {
@@ -303,11 +303,11 @@ func selectOneFanToken(
 
 		account := ak.GetAccount(ctx, t.GetOwner())
 		spendable := bk.SpendableCoins(ctx, account.GetAddress())
-		spendableStake := spendable.AmountOf(app.BondDenom)
+		spendableStake := spendable.AmountOf(types.BondDenom)
 		if spendableStake.IsZero() {
 			continue
 		}
-		maxFees = sdk.NewCoins(sdk.NewCoin(app.BondDenom, spendableStake))
+		maxFees = sdk.NewCoins(sdk.NewCoin(types.BondDenom, spendableStake))
 		token = t
 		return
 	}
@@ -335,7 +335,7 @@ func genFanToken(ctx sdk.Context,
 		token = randFanToken(r, accs)
 	}
 
-	issueFee := k.GetFanTokenIssueFee(ctx, sdk.NewCoin(app.BondDenom, sdk.NewInt(1000000)), token.GetSymbol())
+	issueFee := k.GetFanTokenIssueFee(ctx, sdk.NewCoin(types.BondDenom, sdk.NewInt(1000000)), token.GetSymbol())
 
 	account, maxFees := filterAccount(ctx, r, ak, bk, accs, issueFee)
 	token.Owner = account.String()
@@ -354,12 +354,12 @@ loop:
 	simAccount, _ := simtypes.RandomAcc(r, accs)
 	account := ak.GetAccount(ctx, simAccount.Address)
 	spendable := bk.SpendableCoins(ctx, account.GetAddress())
-	spendableStake := spendable.AmountOf(app.BondDenom)
+	spendableStake := spendable.AmountOf(types.BondDenom)
 	if spendableStake.IsZero() || spendableStake.LT(fee.Amount) {
 		goto loop
 	}
 	owner = account.GetAddress()
-	maxFees = sdk.NewCoins(sdk.NewCoin(app.BondDenom, spendableStake).Sub(fee))
+	maxFees = sdk.NewCoins(sdk.NewCoin(types.BondDenom, spendableStake).Sub(fee))
 	return
 }
 

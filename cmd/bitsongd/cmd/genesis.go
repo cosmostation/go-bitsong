@@ -3,7 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bitsongofficial/go-bitsong/app"
+	"github.com/bitsongofficial/go-bitsong/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -193,10 +193,10 @@ func MainnetGenesisParams() GenesisParams {
 		{
 			Description: fmt.Sprintf("The BitSong's Network native coin"),
 			Display:     "btsg",
-			Base:        app.BondDenom,
+			Base:        types.BondDenom,
 			DenomUnits: []*banktypes.DenomUnit{
 				{
-					Denom:    app.BondDenom,
+					Denom:    types.BondDenom,
 					Exponent: 0,
 					Aliases:  []string{"microbtsg"},
 				},
@@ -210,12 +210,12 @@ func MainnetGenesisParams() GenesisParams {
 	}
 
 	genParams.CrisisConstantFee = sdk.NewCoin(
-		app.BondDenom,
+		types.BondDenom,
 		sdk.NewInt(133_333_000_000),
 	)
 
 	genParams.MintParams = minttypes.DefaultParams()
-	genParams.MintParams.MintDenom = app.BondDenom
+	genParams.MintParams.MintDenom = types.BondDenom
 	genParams.MintParams.InflationRateChange = sdk.NewDecWithPrec(13, 2)
 	genParams.MintParams.InflationMax = sdk.NewDecWithPrec(20, 2)
 	genParams.MintParams.InflationMin = sdk.NewDecWithPrec(7, 2)
@@ -224,7 +224,7 @@ func MainnetGenesisParams() GenesisParams {
 
 	genParams.StakingParams = stakingtypes.DefaultParams()
 	genParams.StakingParams.MaxValidators = 64
-	genParams.StakingParams.BondDenom = app.BondDenom
+	genParams.StakingParams.BondDenom = types.BondDenom
 	genParams.StakingParams.UnbondingTime = time.Hour * 24 * 7 * 3 //3 weeks
 
 	genParams.SlashingParams = slashingtypes.DefaultParams()
@@ -239,7 +239,7 @@ func MainnetGenesisParams() GenesisParams {
 	genParams.GovParams = govtypes.DefaultParams()
 	genParams.GovParams.DepositParams.MaxDepositPeriod = time.Hour * 24 * 15 // 15 days
 	genParams.GovParams.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(
-		app.BondDenom,
+		types.BondDenom,
 		sdk.NewInt(512_000_000),
 	))
 	genParams.GovParams.VotingParams.VotingPeriod = time.Hour * 24 * 4 // 4 days
@@ -261,7 +261,7 @@ func TestnetGenesisParams() GenesisParams {
 	genParams.GenesisTime = time.Now()
 
 	genParams.GovParams.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(
-		app.BondDenom,
+		types.BondDenom,
 		sdk.NewInt(1_000_000), // 1 BTSG
 	))
 	genParams.GovParams.TallyParams.Quorum = sdk.MustNewDecFromStr("0.0000000001") // 0.00000001%

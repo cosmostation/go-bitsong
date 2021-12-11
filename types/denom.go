@@ -1,3 +1,3 @@
-package app
+package types
 
 const BondDenom = "ubtsg"

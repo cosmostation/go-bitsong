@@ -1,8 +1,6 @@
 package fantoken_test
 
 import (
-	"github.com/bitsongofficial/go-bitsong/x/fantoken"
-	"github.com/bitsongofficial/go-bitsong/x/fantoken/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,6 +11,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	simapp "github.com/bitsongofficial/go-bitsong/app"
+	token "github.com/bitsongofficial/go-bitsong/x/fantoken"
+	"github.com/bitsongofficial/go-bitsong/x/fantoken/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
@@ -22,7 +22,7 @@ func TestExportGenesis(t *testing.T) {
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{})
 
 	// export genesis
-	genesisState := fantoken.ExportGenesis(ctx, app.FanTokenKeeper)
+	genesisState := token.ExportGenesis(ctx, app.FanTokenKeeper)
 
 	require.Equal(t, types.DefaultParams(), genesisState.Params)
 }
@@ -55,7 +55,7 @@ func TestInitGenesis(t *testing.T) {
 	}
 
 	// initialize genesis
-	fantoken.InitGenesis(ctx, app.FanTokenKeeper, genesis)
+	token.InitGenesis(ctx, app.FanTokenKeeper, genesis)
 
 	// query all tokens
 	var tokens = app.FanTokenKeeper.GetFanTokens(ctx, nil)

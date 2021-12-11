@@ -3,6 +3,7 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/bitsongofficial/go-bitsong/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/testutil"
@@ -71,8 +72,8 @@ func NewConfig() network.Config {
 	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
 	cfg.AppConstructor = SimAppConstructor
 	cfg.GenesisState = NewDefaultGenesisState()
-	cfg.BondDenom = BondDenom
-	cfg.MinGasPrices = fmt.Sprintf("0.000006%s", BondDenom)
+	cfg.BondDenom = types.BondDenom
+	cfg.MinGasPrices = fmt.Sprintf("0.000006%s", types.BondDenom)
 	return cfg
 }
 
