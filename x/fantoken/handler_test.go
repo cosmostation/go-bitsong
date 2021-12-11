@@ -1,6 +1,7 @@
 package fantoken_test
 
 import (
+	"github.com/bitsongofficial/go-bitsong/x/fantoken"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -12,9 +13,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
-	"github.com/bitsongofficial/go-bitsong/app"
 	simapp "github.com/bitsongofficial/go-bitsong/app"
-	tokenmodule "github.com/bitsongofficial/go-bitsong/x/fantoken"
 	tokenkeeper "github.com/bitsongofficial/go-bitsong/x/fantoken/keeper"
 	tokentypes "github.com/bitsongofficial/go-bitsong/x/fantoken/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -27,7 +26,7 @@ const (
 var (
 	owner    = sdk.AccAddress(tmhash.SumTruncated([]byte("tokenTest")))
 	initAmt  = sdk.NewIntWithDecimal(100000000, int(6))
-	initCoin = sdk.Coins{sdk.NewCoin(app.BondDenom, initAmt)}
+	initCoin = sdk.Coins{sdk.NewCoin(simapp.BondDenom, initAmt)}
 )
 
 func TestHandlerSuite(t *testing.T) {
@@ -80,11 +79,11 @@ func (suite *HandlerSuite) issueFanToken(token tokentypes.FanToken) {
 }
 
 func (suite *HandlerSuite) TestIssueFanToken() {
-	h := tokenmodule.NewHandler(suite.keeper)
+	h := fantoken.NewHandler(suite.keeper)
 
-	issueFee := sdk.NewCoin(app.BondDenom, sdk.NewInt(1000000))
+	issueFee := sdk.NewCoin(simapp.BondDenom, sdk.NewInt(1000000))
 
-	nativeTokenAmt1 := suite.bk.GetBalance(suite.ctx, owner, app.BondDenom).Amount
+	nativeTokenAmt1 := suite.bk.GetBalance(suite.ctx, owner, simapp.BondDenom).Amount
 
 	msg := tokentypes.NewMsgIssueFanToken("btc", "satoshi", sdk.NewInt(21000000), "test", owner.String(), issueFee)
 	denom := tokentypes.GetFantokenDenom(owner, msg.Symbol, msg.Name)
@@ -92,7 +91,7 @@ func (suite *HandlerSuite) TestIssueFanToken() {
 	_, err := h(suite.ctx, msg)
 	suite.NoError(err)
 
-	nativeTokenAmt2 := suite.bk.GetBalance(suite.ctx, owner, app.BondDenom).Amount
+	nativeTokenAmt2 := suite.bk.GetBalance(suite.ctx, owner, simapp.BondDenom).Amount
 
 	suite.Equal(nativeTokenAmt1.Sub(issueFee.Amount), nativeTokenAmt2)
 
@@ -116,7 +115,7 @@ func (suite *HandlerSuite) TestMintFanToken() {
 	beginBtcAmt := suite.bk.GetBalance(suite.ctx, token.GetOwner(), token.GetDenom()).Amount
 	suite.Equal(sdk.ZeroInt(), beginBtcAmt)
 
-	h := tokenmodule.NewHandler(suite.keeper)
+	h := fantoken.NewHandler(suite.keeper)
 
 	msgMintFanToken := tokentypes.NewMsgMintFanToken("", token.GetDenom(), token.Owner, sdk.NewInt(1000))
 	_, err := h(suite.ctx, msgMintFanToken)
@@ -140,7 +139,7 @@ func (suite *HandlerSuite) TestBurnFanToken() {
 	token := tokentypes.NewFanToken("Bitcoin Network", sdk.NewInt(2000), owner, denomMetaData)
 	suite.issueFanToken(token)
 
-	h := tokenmodule.NewHandler(suite.keeper)
+	h := fantoken.NewHandler(suite.keeper)
 
 	msgMintFanToken := tokentypes.NewMsgMintFanToken("", token.GetDenom(), token.Owner, sdk.NewInt(1000))
 	_, err := h(suite.ctx, msgMintFanToken)

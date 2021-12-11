@@ -2,7 +2,7 @@ package types
 
 import (
 	"fmt"
-	"github.com/bitsongofficial/go-bitsong/app"
+	simapp "github.com/bitsongofficial/go-bitsong/app"
 
 	"gopkg.in/yaml.v2"
 
@@ -38,7 +38,7 @@ func ParamKeyTable() paramtypes.KeyTable {
 // DefaultParams return the default params
 func DefaultParams() Params {
 	return Params{
-		IssuePrice: sdk.NewCoin(app.BondDenom, sdk.NewInt(1000000)),
+		IssuePrice: sdk.NewCoin(simapp.BondDenom, sdk.NewInt(1000000)),
 	}
 }
 

@@ -2,7 +2,7 @@ package rest
 
 import (
 	"fmt"
-	app "github.com/bitsongofficial/go-bitsong/app"
+	simapp "github.com/bitsongofficial/go-bitsong/app"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,21 +11,21 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/types/rest"
 
-	tokentypes "github.com/bitsongofficial/go-bitsong/x/fantoken/types"
+	"github.com/bitsongofficial/go-bitsong/x/fantoken/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func registerTxRoutes(cliCtx client.Context, r *mux.Router) {
 	// issue a token
-	r.HandleFunc(fmt.Sprintf("/%s/denom", tokentypes.ModuleName), issueTokenHandlerFn(cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/%s/denom", types.ModuleName), issueTokenHandlerFn(cliCtx)).Methods("POST")
 	// edit a token
-	r.HandleFunc(fmt.Sprintf("/%s/denom/{%s}", tokentypes.ModuleName, RestParamDenom), editFanTokenHandlerFn(cliCtx)).Methods("PUT")
+	r.HandleFunc(fmt.Sprintf("/%s/denom/{%s}", types.ModuleName, RestParamDenom), editFanTokenHandlerFn(cliCtx)).Methods("PUT")
 	// transfer owner
-	r.HandleFunc(fmt.Sprintf("/%s/denom/{%s}/transfer", tokentypes.ModuleName, RestParamDenom), transferOwnerHandlerFn(cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/%s/denom/{%s}/transfer", types.ModuleName, RestParamDenom), transferOwnerHandlerFn(cliCtx)).Methods("POST")
 	// mint token
-	r.HandleFunc(fmt.Sprintf("/%s/denom/{%s}/mint", tokentypes.ModuleName, RestParamDenom), mintFanTokenHandlerFn(cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/%s/denom/{%s}/mint", types.ModuleName, RestParamDenom), mintFanTokenHandlerFn(cliCtx)).Methods("POST")
 	// burn token
-	r.HandleFunc(fmt.Sprintf("/%s/denom/{%s}/burn", tokentypes.ModuleName, RestParamDenom), burnFanTokenHandlerFn(cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/%s/denom/{%s}/burn", types.ModuleName, RestParamDenom), burnFanTokenHandlerFn(cliCtx)).Methods("POST")
 }
 
 func issueTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
@@ -53,13 +53,13 @@ func issueTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		}
 
 		// create the MsgIssueToken message
-		msg := &tokentypes.MsgIssueFanToken{
+		msg := &types.MsgIssueFanToken{
 			Symbol:      req.Symbol,
 			Name:        req.Name,
 			MaxSupply:   maxSupply,
 			Description: req.Description,
 			Owner:       req.Owner,
-			IssueFee:    sdk.NewCoin(app.BondDenom, issueFee),
+			IssueFee:    sdk.NewCoin(simapp.BondDenom, issueFee),
 		}
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
@@ -88,7 +88,7 @@ func editFanTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		mintable := req.Mintable
 
 		// create the MsgEditToken message
-		msg := tokentypes.NewMsgEditFanToken(denom, mintable, req.Owner)
+		msg := types.NewMsgEditFanToken(denom, mintable, req.Owner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -114,7 +114,7 @@ func transferOwnerHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		}
 
 		// create the MsgTransferTokenOwner message
-		msg := tokentypes.NewMsgTransferFanTokenOwner(denom, req.SrcOwner, req.DstOwner)
+		msg := types.NewMsgTransferFanTokenOwner(denom, req.SrcOwner, req.DstOwner)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -146,7 +146,7 @@ func mintFanTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		}
 
 		// create the MsgMintFanToken message
-		msg := tokentypes.NewMsgMintFanToken(req.Recipient, denom, req.Owner, amount)
+		msg := types.NewMsgMintFanToken(req.Recipient, denom, req.Owner, amount)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -178,7 +178,7 @@ func burnFanTokenHandlerFn(cliCtx client.Context) http.HandlerFunc {
 		}
 
 		// create the MsgMintToken message
-		msg := tokentypes.NewMsgBurnFanToken(denom, req.Sender, amount)
+		msg := types.NewMsgBurnFanToken(denom, req.Sender, amount)
 		if err := msg.ValidateBasic(); err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
