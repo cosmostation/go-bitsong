@@ -16,9 +16,10 @@ type Account struct {
 }
 
 type ClaimInfo struct {
-	Index  uint64   `json:"index"`
-	Amount string   `json:"amount"`
-	Proof  []string `json:"proof"`
+	Address string   `json:"address"`
+	Index   uint64   `json:"index"`
+	Amount  string   `json:"amount"`
+	Proof   []string `json:"proof"`
 }
 
 func AccountsFromMap(accMap map[string]string) ([]*Account, error) {
@@ -46,7 +47,7 @@ func AccountsFromMap(accMap map[string]string) ([]*Account, error) {
 	return accsMap, nil
 }
 
-func CreateDistributionList(accounts []*Account) (Tree, map[string]ClaimInfo, sdk.Int, error) {
+func CreateDistributionList(accounts []*Account) (Tree, []ClaimInfo, sdk.Int, error) {
 	// sort lists by coin amount
 	sort.Slice(accounts, func(i, j int) bool {
 		return accounts[i].amount.LT(accounts[j].amount)
@@ -63,15 +64,16 @@ func CreateDistributionList(accounts []*Account) (Tree, map[string]ClaimInfo, sd
 
 	tree := NewTree(nodes...)
 
-	addrToProof := make(map[string]ClaimInfo, len(accounts))
+	addrToProof := make([]ClaimInfo, len(accounts))
 
 	for i, acc := range accounts {
 		proof := ProofBytesToString(tree.Proof(crypto.Sha256(nodes[i])))
 
-		addrToProof[acc.address.String()] = ClaimInfo{
-			Index:  uint64(i),
-			Amount: acc.amount.String(),
-			Proof:  proof,
+		addrToProof[i] = ClaimInfo{
+			Address: acc.address.String(),
+			Index:   uint64(i),
+			Amount:  acc.amount.String(),
+			Proof:   proof,
 		}
 	}
 

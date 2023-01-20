@@ -11,6 +11,7 @@ const (
 	FlagEndHeight   = "end-height"
 	FlagAmount      = "amount"
 	FlagDenom       = "denom"
+	FlagIPFSNode    = "ipfs-node"
 )
 
 func FlagsCreate() *flag.FlagSet {
@@ -18,6 +19,7 @@ func FlagsCreate() *flag.FlagSet {
 	fs.Int64(FlagStartHeight, 0, "Start height of the merkledrop")
 	fs.Int64(FlagEndHeight, 0, "End height of the merkledrop")
 	fs.String(FlagDenom, "", "Denom of the merkledrop")
+	fs.String(FlagIPFSNode, "localhost:5001", "IPFS node to use")
 
 	return fs
 }

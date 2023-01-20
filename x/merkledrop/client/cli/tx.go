@@ -17,6 +17,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	ipfsapi "github.com/ipfs/go-ipfs-api"
 )
 
 // NewTxCmd returns the transaction commands for the merkledrop module.
@@ -65,7 +67,18 @@ where accounts.json contains
 	"bitsong1nzxmsks45e55d5edj4mcd08u8dycaxq5eplakw": "3000000"
 }
 
-after the computation the out-list.json should be similar to this output
+after the computation the out-list/*.json should be similar to this output
+{
+  "address": "bitsong107yfv7396n7ket3j0l666trx6ww729q9my785g",
+  "index": 3,
+  "amount": "1000000000",
+  "proof": [
+    "228b2d5a49f2724a287443a2ed95d7c663aa40e5df8486efac7f3cdad1b1b0f1",
+    "4026fef271e51c652b1e0c98673e4b68beb3bdf9136520ffd8397497efb0c39e",
+    "75538c0c43de52a7daa75daaa5029fa8972685849326565722eaa65141c455b9",
+    "ca617d2b4256c08bcaecc8a271bbbf9a21325a7bb0a707baf0e7a1a56fa6e972"
+  ]
+}
 {
   "bitsong10clahhd4g878vzyl69hcnue9uufp5dle4867md": {
     "index": 0,
@@ -94,7 +107,7 @@ after the computation the out-list.json should be similar to this output
 `,
 			version.AppName,
 		)),
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
@@ -103,43 +116,94 @@ after the computation the out-list.json should be similar to this output
 
 			listBytes, err := ioutil.ReadFile(args[0])
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to read file %s: %w", args[0], err)
 			}
 
 			var stringList map[string]string
 			if err := json.Unmarshal(listBytes, &stringList); err != nil {
-				return fmt.Errorf("Could not unmarshal json: %v", err)
+				return fmt.Errorf("could not unmarshal json: %v", err)
 			}
 
 			accMap, err := AccountsFromMap(stringList)
 			if err != nil {
-				return fmt.Errorf("Could not get accounts from map")
+				return fmt.Errorf("could not get accounts from map")
 			}
 
-			tree, claimInfo, totalAmt, err := CreateDistributionList(accMap)
+			tree, claimInfos, totalAmt, err := CreateDistributionList(accMap)
 			if err != nil {
-				return fmt.Errorf("Could not create distribution list: %v", err)
+				return fmt.Errorf("could not create distribution list: %v", err)
 			}
 
-			if _, err := createFile(args[1], claimInfo); err != nil {
-				return fmt.Errorf("Could not create file: %v", err)
+			tmpDir := os.TempDir()
+			merkledropDir := tmpDir + "/merkledrop"
+
+			// Remove the directory if it exists
+			if _, err := os.Stat(merkledropDir); !os.IsNotExist(err) {
+				err := os.RemoveAll(merkledropDir)
+				if err != nil {
+					return fmt.Errorf("could not remove directory: %v", err)
+				}
+			}
+
+			// Create the directory if it does not exist
+			if _, err := os.Stat(merkledropDir); os.IsNotExist(err) {
+				err := os.Mkdir(merkledropDir, 0755)
+				if err != nil {
+					return fmt.Errorf("could not create directory: %v", err)
+				}
+			}
+
+			for i, _ := range claimInfos {
+				claimInfo := claimInfos[i]
+				claimInfoBytes, err := json.Marshal(claimInfo)
+				if err != nil {
+					return fmt.Errorf("could not marshal claim info: %v", err)
+				}
+				filePath := fmt.Sprintf("%s/%s.json", merkledropDir, claimInfo.Address)
+				err = ioutil.WriteFile(filePath, claimInfoBytes, 0644)
+				if err != nil {
+					return fmt.Errorf("could not write file: %v", err)
+				}
+			}
+
+			ipfsNode, err := cmd.Flags().GetString("ipfs-node")
+			ipfs := ipfsapi.NewShell(ipfsNode)
+			ipfsDir, err := ipfs.AddDir(merkledropDir)
+			if err != nil {
+				return fmt.Errorf("could not add directory to ipfs: %v", err)
+			}
+			// pin uploaded dir to ipfs
+			err = ipfs.Pin(ipfsDir)
+			if err != nil {
+				return fmt.Errorf("could not pin directory to ipfs: %v", err)
 			}
 
 			startHeight, endHeight, denom, err := parseGenerateFlags(cmd.Flags())
+			if denom == "" {
+				return fmt.Errorf("denom cannot be empty")
+			}
 			merkleRoot := fmt.Sprintf("%x", tree.Root())
 
 			coin, err := sdk.ParseCoinNormalized(fmt.Sprintf("%s%s", totalAmt.String(), denom))
 			if err != nil {
-				return err
+				return fmt.Errorf("could not parse coin: %v", err)
 			}
 
 			msg := types.NewMsgCreate(clientCtx.GetFromAddress(), merkleRoot, startHeight, endHeight, coin)
 
 			if err := msg.ValidateBasic(); err != nil {
-				return err
+				return fmt.Errorf("message validation failed: %v", err)
 			}
 
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+			err = tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+			if err != nil {
+				return fmt.Errorf("could not broadcast tx: %v", err)
+			}
+
+			fmt.Println("IPFS Directory: " + ipfsDir)
+			fmt.Println("IPFS Directory Link: https://bas-cdn.com/ipfs/" + ipfsDir)
+
+			return nil
 		},
 	}
 
