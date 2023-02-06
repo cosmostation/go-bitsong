@@ -106,6 +106,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig params.EncodingConfig) {
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
+		CustomExportCmd(appCustomExport, app.DefaultNodeHome),
 		rpc.StatusCommand(),
 		queryCommand(),
 		txCommand(),
@@ -251,6 +252,43 @@ func appExport(
 	}
 
 	return bApp.ExportAppStateAndValidators(forZeroHeight, jailAllowedAddrs)
+}
+
+func appCustomExport(
+	logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, appOpts bitsong.AppOptions) (bitsong.ExportedApp, error) {
+
+	homePath, ok := appOpts.Get(flags.FlagHome).(string)
+	if !ok || homePath == "" {
+		return bitsong.ExportedApp{}, errors.New("application home not set")
+	}
+
+	var loadLatest bool
+	if height == -1 {
+		loadLatest = true
+	}
+
+	encCfg := app.MakeEncodingConfig()
+	encCfg.Marshaler = codec.NewProtoCodec(encCfg.InterfaceRegistry)
+
+	bApp := app.NewBitsongApp(
+		logger,
+		db,
+		traceStore,
+		loadLatest,
+		map[int64]bool{},
+		homePath,
+		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
+		encCfg,
+		appOpts,
+	)
+
+	if height != -1 {
+		if err := bApp.LoadHeight(height); err != nil {
+			return bitsong.ExportedApp{}, err
+		}
+	}
+
+	return bApp.ExportCustomAppState()
 }
 
 /*func overwriteFlagDefaults(c *cobra.Command, defaults map[string]string) {

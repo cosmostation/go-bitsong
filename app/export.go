@@ -2,6 +2,12 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/types/module"
+	tmlog "github.com/tendermint/tendermint/libs/log"
+	dbm "github.com/tendermint/tm-db"
+	"io"
 	"log"
 
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -11,6 +17,19 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+)
+
+type (
+	AppOptions interface {
+		Get(string) interface{}
+	}
+	AppExporter func(tmlog.Logger, dbm.DB, io.Writer, int64, AppOptions) (ExportedApp, error)
+	ExportedApp struct {
+		// AppState is the application state as JSON.
+		AppState json.RawMessage
+		// Height is the app's latest block height.
+		Height int64
+	}
 )
 
 // ExportAppStateAndValidators exports the state of the application for a genesis
@@ -45,6 +64,49 @@ func (app *BitsongApp) ExportAppStateAndValidators(
 		Height:          height,
 		ConsensusParams: app.BaseApp.GetConsensusParams(ctx),
 	}, nil
+}
+
+func (app *BitsongApp) ExportCustomAppState() (ExportedApp, error) {
+	// as if they could withdraw from the start of the next block
+	ctx := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
+
+	// We export at last height + 1, because that's the height at which
+	// Tendermint will start InitChain.
+	height := app.LastBlockHeight() + 1
+
+	genState := exportCustomGenesis(ctx, app.mm, app.appCodec)
+	appState, err := json.MarshalIndent(genState, "", "  ")
+	if err != nil {
+		return ExportedApp{}, err
+	}
+	bankGenesis := app.BankKeeper.GetAccountsBalances(ctx)
+	fmt.Println(bankGenesis)
+	return ExportedApp{
+		AppState: appState,
+		Height:   height,
+	}, nil
+}
+
+// exportGenesis performs export genesis functionality for modules
+func exportCustomGenesis(ctx sdk.Context, mm *module.Manager, cdc codec.JSONCodec) map[string]json.RawMessage {
+	genesisData := make(map[string]json.RawMessage)
+	for _, moduleName := range mm.OrderExportGenesis {
+		if !allowedModule(moduleName) {
+			continue
+		}
+		fmt.Println("Exporting genesis for module", moduleName)
+		genesisData[moduleName] = mm.Modules[moduleName].ExportGenesis(ctx, cdc)
+	}
+
+	return genesisData
+}
+
+func allowedModule(name string) bool {
+	allowedModules := map[string]bool{
+		"bank": true,
+	}
+	_, ok := allowedModules[name]
+	return ok
 }
 
 // prepare for fresh start at zero height
